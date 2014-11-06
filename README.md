@@ -4,6 +4,18 @@ xmlparse is a library for python.
 
 It can dump any basic python variable to a xml file, and parse it from this file.
 
+## mathod list ##
+    xmlparse.var2file(var, path)
+    xmlparse.file2var(path)
+
+    xmlparse.var2xml(var, title='xmlparse')
+    xmlparse.xml2file(ET, path)
+
+    xmlparse.file2xml(path)
+    xmlparse.xml2var(ET)
+
+
+
 ## example ##
 ##### import #####
     >>> import xmlparse
