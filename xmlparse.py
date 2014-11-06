@@ -7,7 +7,6 @@ basic type, it can support other type defined as follow:
 '''
 
 from lxml import etree
-import xml.etree.ElementTree as xmlET
 import os
 import datetime
 
@@ -32,7 +31,7 @@ def file2var(path):
 
     '''
     ET = file2xml(path)
-    if ET.tag != _root_title:
+    if ET.getroot().tag != _root_title:
         return None
     return xml2var(ET)
 
@@ -49,9 +48,9 @@ def file2xml(path):
     if not os.path.exists(path):
         return None
     try:
-        parser = etree.XMLParser(recover=True)
-        with open(path) as F:
-            return xmlET.fromstring(F.read(), parser=parser)
+        parser = etree.XMLParser(encoding='utf-8', recover=True)
+        b = etree.parse(path, parser=parser)
+        return etree.parse(path, parser=parser)
     except Exception, e:
         print "%s" % e
         return None
@@ -59,18 +58,15 @@ def file2xml(path):
 def var2xml(var, title='xmlparse'):
     if var is None:
         return None
-    def dump(self):
-        xmlET.dump(self)
-    xmlET.ElementTree.dump = dump
-    root = xmlET.Element(title)
+    root = etree.Element(title)
     _fillsub(root, var)
-    return xmlET.ElementTree(root)
+    return etree.ElementTree(root)
 
 def xml2var(ET):
     if ET is None:
         return None
-    #root = ET.getroot()
-    return _parsesub(ET)
+    root = ET.getroot()
+    return _parsesub(root)
 
 def _numbertosymbol(number_str):
     return 'k%s' % number_str
@@ -112,25 +108,25 @@ def _fillsub(xmlElement, data):
         xmlElement.attrib['type'] = 'dict'
         for key in data.iterkeys():
             if type(key) is int:
-                key_ele = xmlET.SubElement(xmlElement, _numbertosymbol(str(key)))
+                key_ele = etree.SubElement(xmlElement, _numbertosymbol(str(key)))
                 key_ele.attrib['keytype'] = 'int'
             elif type(key) is long:
-                key_ele = xmlET.SubElement(xmlElement, _numbertosymbol(str(key)))
+                key_ele = etree.SubElement(xmlElement, _numbertosymbol(str(key)))
                 key_ele.attrib['keytype'] = 'long'
             elif type(key) is float:
-                key_ele = xmlET.SubElement(xmlElement, _numbertosymbol(str(key)))
+                key_ele = etree.SubElement(xmlElement, _numbertosymbol(str(key)))
                 key_ele.attrib['keytype'] = 'float'
             elif type(key) is bool:
                 if key:
-                    key_ele = xmlET.SubElement(xmlElement, _numbertosymbol(str(1)))
+                    key_ele = etree.SubElement(xmlElement, _numbertosymbol(str(1)))
                 else:
-                    key_ele = xmlET.SubElement(xmlElement, _numbertosymbol(str(0)))
+                    key_ele = etree.SubElement(xmlElement, _numbertosymbol(str(0)))
                 key_ele.attrib['keytype'] = 'bool'
             elif type(key) is unicode:
-                key_ele = xmlET.SubElement(xmlElement, _numbertosymbol(str(key)))
+                key_ele = etree.SubElement(xmlElement, _numbertosymbol(str(key)))
                 key_ele.attrib['keytype'] = 'unicode'
             else:
-                key_ele = xmlET.SubElement(xmlElement, _numbertosymbol(str(key)))
+                key_ele = etree.SubElement(xmlElement, _numbertosymbol(str(key)))
                 key_ele.attrib['keytype'] = 'str'
             _fillsub(key_ele, data[key])
         return
@@ -138,7 +134,7 @@ def _fillsub(xmlElement, data):
         xmlElement.attrib['type'] = 'list'
         i = 0
         for value in data:
-            value_ele = xmlET.SubElement(xmlElement, 'e' + str(i))
+            value_ele = etree.SubElement(xmlElement, 'e' + str(i))
             _fillsub(value_ele, value)
             i += 1
         return
@@ -146,7 +142,7 @@ def _fillsub(xmlElement, data):
         xmlElement.attrib['type'] = 'tuple'
         i = 0
         for value in data:
-            value_ele = xmlET.SubElement(xmlElement, 'e' + str(i))
+            value_ele = etree.SubElement(xmlElement, 'e' + str(i))
             _fillsub(value_ele, value)
             i += 1
         return
